@@ -30,15 +30,14 @@ async function main() {
   
   ws.on('open', async () => {
     spinner.text = `Connected`;
-    const total = 100;
+    const total = 10;
     // const total = 100000000;
     for (let i = 0; i < total; i++) {
-      spinner.text = `sending ${chalk.yellow(i)}/${chalk.yellow(total)} size ${chalk.cyan(buffer.length)} to ${chalk.cyan(url)}`;
+      spinner.text = `sending ${chalk.yellow(i + 1)}/${chalk.yellow(total)} size ${chalk.cyan(buffer.length)} to ${chalk.cyan(url)}`;
       ws.send(buffer);
       await sleep(100);
     }
-    spinner.stopAndPersist();
-    spinner.succeed('done');
+    spinner.succeed();
   });
 
 }
