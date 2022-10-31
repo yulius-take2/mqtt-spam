@@ -34,7 +34,11 @@ async function main() {
 
   ws.on('error', (err) => {
     console.log('error', err);
-  })
+  });
+
+  ws.on('message', (data, binary) => {
+    console.log('data', data);
+  });
   
   ws.on('open', async () => {
     spinner.text = `Connected`;
