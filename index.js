@@ -2,55 +2,48 @@ const { WebSocket } = require('ws');
 const ora = require('ora');
 const chalk = require('chalk');
 const yargs = require('yargs');
+const fs = require('fs');
 
-// create buffer to send to websocket
-const bufferBytes = [0xcb, 0xfc, 0x5d, 0xd4];
-const bufferData = []
-for (let i = 0; i < 3904; i++) {
-  bufferData.push(...bufferBytes);
-}
+const bufferData = fs.readFileSync('./connectpacket.bin');
 const buffer = new Uint8Array(bufferData);
 
-function sleep(t) {
+function sendConnect(prefix = '\t') {
   return new Promise((resolve, reject) => {
-    setTimeout(resolve, t);
+    const url = 'wss://social-service-integration.d2dragon.net/mqtt';
+    const ws = new WebSocket(url, 'mqtt', {});
+    console.log(prefix, 'connecting to', url);
+  
+    ws.on('error', (err) => {
+      console.log(prefix, 'error', err);
+      reject();
+    });
+  
+    ws.on('message', (data, binary) => {
+      console.log(prefix, 'data', binary, data);
+    });
+    
+    ws.on('open', async () => {
+      console.log(prefix, 'sending buffer', buffer.length);
+      const options =  {
+        compress: false,
+        binary: true,
+      };
+      ws.send(buffer, options, (err) => {
+        console.log(prefix, 'send complete. error', err);
+      });   
+    });
+  
+    ws.on('close', (code, reason) => {
+      console.log(prefix, 'websocket closed', code, reason.toString());
+      resolve();
+    });  
   });
 }
 
 async function main() {
-
-  const argv = yargs
-    .option('url')
-    .argv
-
-  let total = 100;
-  if (argv._.length === 1) {
-    total = parseInt(argv._[0]) || 100;
+  for (let i = 0; i < 1000000; i++) {
+    console.log('iteration', i+1);
+    await sendConnect();
   }
-
-  const url = argv.url ||  'wss://social-service-develop.d2dragon.net/mqtt';
-  const ws = new WebSocket(url, 'mqtt', {});
-  const spinner = ora();
-  spinner.start();
-  spinner.text = `Connecting to ${url}`;
-
-  ws.on('error', (err) => {
-    console.log('error', err);
-  });
-
-  ws.on('message', (data, binary) => {
-    console.log('data', data);
-  });
-  
-  ws.on('open', async () => {
-    spinner.text = `Connected`;
-    for (let i = 0; i < total; i++) {
-      spinner.text = `sending ${chalk.yellow(i + 1)}/${chalk.yellow(total)} size ${chalk.cyan(buffer.length)} to ${chalk.cyan(url)}`;
-      ws.send(buffer);
-      await sleep(100);
-    }
-    spinner.succeed();
-  });
-
 }
 main();

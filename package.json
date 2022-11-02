@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "chalk": "^4.1.2",
+    "mqtt": "^4.3.7",
     "ora": "^4.0.4",
     "ws": "^8.10.0",
     "yargs": "^17.6.0"
