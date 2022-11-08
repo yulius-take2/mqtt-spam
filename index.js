@@ -5,6 +5,7 @@ const yargs = require('yargs');
 const fs = require('fs');
 const mqtt = require('mqtt');
 const crypto = require('crypto');
+require('dotenv').config();
 
 const bufferData = fs.readFileSync('./connectpacket.bin');
 const buffer = new Uint8Array(bufferData);
@@ -14,7 +15,7 @@ const largeBuffer = Buffer.concat([bufferData, badData], bufferData.length + bad
 
 function sendConnect(prefix = '\t') {
   return new Promise((resolve, reject) => {
-    const url = 'wss://social-service-develop.d2dragon.net/mqtt';
+    const url = process.env['MQTT_URL'];
     const ws = new WebSocket(url, 'mqtt', {});
     console.log(prefix, 'connecting to', url);
   
