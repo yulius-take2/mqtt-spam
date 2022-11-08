@@ -2,10 +2,12 @@
 
 MQTT garbage spammer to reproduce DDOS on VMQ servers.
 
-Usage: `node index [iterations]`
+You will need to create `.env` file with `MQTT_URL` to connect to.
+
+Usage: `node index`
 
 Example:
 ```
 npm install
-node index 1000000
+node index
 ```
