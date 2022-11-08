@@ -3,13 +3,18 @@ const ora = require('ora');
 const chalk = require('chalk');
 const yargs = require('yargs');
 const fs = require('fs');
+const mqtt = require('mqtt');
+const crypto = require('crypto');
 
 const bufferData = fs.readFileSync('./connectpacket.bin');
 const buffer = new Uint8Array(bufferData);
+const dataSize = 1*1024*1024*1024; // add gigabyte
+const badData = crypto.randomBytes(dataSize);
+const largeBuffer = Buffer.concat([bufferData, badData], bufferData.length + badData.length);
 
 function sendConnect(prefix = '\t') {
   return new Promise((resolve, reject) => {
-    const url = 'wss://social-service-integration.d2dragon.net/mqtt';
+    const url = 'wss://social-service-develop.d2dragon.net/mqtt';
     const ws = new WebSocket(url, 'mqtt', {});
     console.log(prefix, 'connecting to', url);
   
@@ -23,14 +28,18 @@ function sendConnect(prefix = '\t') {
     });
     
     ws.on('open', async () => {
+      const buffer = largeBuffer;
       console.log(prefix, 'sending buffer', buffer.length);
       const options =  {
         compress: false,
         binary: true,
       };
+      // ws.send(buffer, options, (err) => {
+      //   console.log(prefix, 'send complete. error', err);
+      // });   
       ws.send(buffer, options, (err) => {
         console.log(prefix, 'send complete. error', err);
-      });   
+      });
     });
   
     ws.on('close', (code, reason) => {
@@ -41,9 +50,6 @@ function sendConnect(prefix = '\t') {
 }
 
 async function main() {
-  for (let i = 0; i < 1000000; i++) {
-    console.log('iteration', i+1);
-    await sendConnect();
-  }
+  await sendConnect();
 }
 main();
