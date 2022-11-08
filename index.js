@@ -35,9 +35,6 @@ function sendConnect(prefix = '\t') {
         compress: false,
         binary: true,
       };
-      // ws.send(buffer, options, (err) => {
-      //   console.log(prefix, 'send complete. error', err);
-      // });   
       ws.send(buffer, options, (err) => {
         console.log(prefix, 'send complete. error', err);
       });
